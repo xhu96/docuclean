@@ -1,73 +1,51 @@
-# React + TypeScript + Vite
+# DocuClean 🛡️
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Remove metadata from PDF and DOCX files **instantly** in your browser.
 
-Currently, two official plugins are available:
+[![Deploy to GitHub Pages](https://github.com/xhu96/docuclean/actions/workflows/deploy.yml/badge.svg)](https://github.com/xhu96/docuclean/actions/workflows/deploy.yml)
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## ✨ Features
 
-## React Compiler
+- **100% Client-Side** - Files never leave your device
+- **No Uploads** - All processing happens locally in WebAssembly/JS
+- **Works Offline** - Can be installed as a PWA
+- **Selective Removal** - Choose which metadata fields to strip
+- **Batch Processing** - Clean multiple files at once
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## 🔒 What Gets Removed
 
-## Expanding the ESLint configuration
+### PDF
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+Title, Author, Subject, Keywords, Creator, Producer, Creation/Modification Dates
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+### DOCX
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+Title, Subject, Creator, Keywords, Company, Manager, Last Modified By, Revision, Template, and 10+ more fields
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+## 🚀 Live Demo
+
+**[Open DocuClean →](https://xhu96.github.io/docuclean/)**
+
+## 🛠️ Development
+
+```bash
+# Install dependencies
+npm install
+
+# Start dev server
+npm run dev
+
+# Build for production
+npm run build
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+## 📦 Tech Stack
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+- React + TypeScript + Vite
+- [pdf-lib](https://pdf-lib.js.org/) - PDF manipulation
+- [JSZip](https://stuk.github.io/jszip/) - DOCX (OOXML) handling
+- Lucide React - Icons
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+## 📄 License
+
+MIT
