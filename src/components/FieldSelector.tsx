@@ -93,7 +93,6 @@ function FieldGroup({
 }) {
   const allSelected = Object.values(fields).every(v => v);
   const noneSelected = Object.values(fields).every(v => !v);
-  const someSelected = !allSelected && !noneSelected;
 
   return (
     <div className="field-group">

@@ -66,7 +66,7 @@ export async function cleanPdf(file: File, enabledFields?: PdfFieldConfig): Prom
   }
 
   const cleanedBytes = await pdfDoc.save();
-  const cleanedBlob = new Blob([cleanedBytes], { type: 'application/pdf' });
+  const cleanedBlob = new Blob([cleanedBytes.buffer], { type: 'application/pdf' });
 
   return {
     originalName: file.name,
