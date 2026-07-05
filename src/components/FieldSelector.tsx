@@ -6,40 +6,6 @@ export interface FieldConfig {
   docx: Record<string, boolean>;
 }
 
-export const DEFAULT_PDF_FIELDS = {
-  title: true,
-  author: true,
-  subject: true,
-  keywords: true,
-  creator: true,
-  producer: true,
-  creationDate: true,
-  modificationDate: true,
-};
-
-export const DEFAULT_DOCX_FIELDS = {
-  'dc:title': true,
-  'dc:subject': true,
-  'dc:creator': true,
-  'cp:keywords': true,
-  'dc:description': true,
-  'cp:lastModifiedBy': true,
-  'cp:revision': true,
-  'cp:lastPrinted': true,
-  'dcterms:created': true,
-  'dcterms:modified': true,
-  'cp:category': true,
-  'cp:contentStatus': true,
-  'Application': true,
-  'AppVersion': true,
-  'Company': true,
-  'Manager': true,
-  'Template': true,
-  'TotalTime': true,
-  'DocSecurity': true,
-  'custom.xml': true,
-};
-
 const FIELD_LABELS: Record<string, string> = {
   // PDF
   title: 'Title',
@@ -50,6 +16,7 @@ const FIELD_LABELS: Record<string, string> = {
   producer: 'Producer',
   creationDate: 'Creation Date',
   modificationDate: 'Modification Date',
+  xmp: 'XMP Metadata',
   // DOCX
   'dc:title': 'Title',
   'dc:subject': 'Subject',
@@ -71,6 +38,7 @@ const FIELD_LABELS: Record<string, string> = {
   'TotalTime': 'Total Time',
   'DocSecurity': 'Doc Security',
   'custom.xml': 'Custom Properties',
+  'thumbnail': 'Thumbnail',
 };
 
 interface FieldSelectorProps {
@@ -141,43 +109,14 @@ function FieldGroup({
 export function FieldSelector({ config, onChange }: FieldSelectorProps) {
   const [isExpanded, setIsExpanded] = useState(false);
 
-  const handlePdfToggle = (field: string) => {
+  const toggle = (kind: keyof FieldConfig, field: string) =>
+    onChange({ ...config, [kind]: { ...config[kind], [field]: !config[kind][field] } });
+
+  const setAll = (kind: keyof FieldConfig, value: boolean) =>
     onChange({
       ...config,
-      pdf: { ...config.pdf, [field]: !config.pdf[field] },
+      [kind]: Object.fromEntries(Object.keys(config[kind]).map((k) => [k, value])),
     });
-  };
-
-  const handleDocxToggle = (field: string) => {
-    onChange({
-      ...config,
-      docx: { ...config.docx, [field]: !config.docx[field] },
-    });
-  };
-
-  const handlePdfSelectAll = () => {
-    const newPdf = { ...config.pdf };
-    Object.keys(newPdf).forEach(k => newPdf[k] = true);
-    onChange({ ...config, pdf: newPdf });
-  };
-
-  const handlePdfDeselectAll = () => {
-    const newPdf = { ...config.pdf };
-    Object.keys(newPdf).forEach(k => newPdf[k] = false);
-    onChange({ ...config, pdf: newPdf });
-  };
-
-  const handleDocxSelectAll = () => {
-    const newDocx = { ...config.docx };
-    Object.keys(newDocx).forEach(k => newDocx[k] = true);
-    onChange({ ...config, docx: newDocx });
-  };
-
-  const handleDocxDeselectAll = () => {
-    const newDocx = { ...config.docx };
-    Object.keys(newDocx).forEach(k => newDocx[k] = false);
-    onChange({ ...config, docx: newDocx });
-  };
 
   const totalEnabled = 
     Object.values(config.pdf).filter(v => v).length +
@@ -201,16 +140,16 @@ export function FieldSelector({ config, onChange }: FieldSelectorProps) {
           <FieldGroup
             title="PDF Fields"
             fields={config.pdf}
-            onToggle={handlePdfToggle}
-            onSelectAll={handlePdfSelectAll}
-            onDeselectAll={handlePdfDeselectAll}
+            onToggle={(field) => toggle('pdf', field)}
+            onSelectAll={() => setAll('pdf', true)}
+            onDeselectAll={() => setAll('pdf', false)}
           />
           <FieldGroup
             title="DOCX Fields"
             fields={config.docx}
-            onToggle={handleDocxToggle}
-            onSelectAll={handleDocxSelectAll}
-            onDeselectAll={handleDocxDeselectAll}
+            onToggle={(field) => toggle('docx', field)}
+            onSelectAll={() => setAll('docx', true)}
+            onDeselectAll={() => setAll('docx', false)}
           />
         </div>
       )}

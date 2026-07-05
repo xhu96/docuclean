@@ -70,9 +70,21 @@ export function DropZone({ onFilesSelected, isProcessing }: DropZoneProps) {
     }
   };
 
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if ((e.key === 'Enter' || e.key === ' ') && !isProcessing) {
+      e.preventDefault();
+      fileInputRef.current?.click();
+    }
+  };
+
   return (
     <div
+      role="button"
+      tabIndex={0}
+      aria-label="Choose PDF or DOCX files to clean"
+      aria-busy={isProcessing}
       onClick={handleClick}
+      onKeyDown={handleKeyDown}
       onDragOver={handleDragOver}
       onDragLeave={handleDragLeave}
       onDrop={handleDrop}

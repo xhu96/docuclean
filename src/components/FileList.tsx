@@ -1,4 +1,4 @@
-import { Download, FileText, FileType, Check, ChevronDown, ChevronUp } from 'lucide-react';
+import { Download, FileText, FileType, Check, ChevronDown, ChevronUp, AlertCircle } from 'lucide-react';
 import { saveAs } from 'file-saver';
 import { useState } from 'react';
 
@@ -6,9 +6,16 @@ export interface ProcessedFile {
   id: string;
   originalName: string;
   type: 'pdf' | 'docx';
-  cleanedBlob: Blob;
+  cleanedBlob?: Blob;
   removedMetadata: Record<string, string | undefined>;
   processedAt: Date;
+  error?: string;
+}
+
+function downloadFile(file: ProcessedFile) {
+  if (!file.cleanedBlob) return;
+  const cleanName = file.originalName.replace(/\.(pdf|docx)$/i, '_clean.$1');
+  saveAs(file.cleanedBlob, cleanName);
 }
 
 interface FileListProps {
@@ -41,18 +48,13 @@ function MetadataPreview({ metadata }: { metadata: Record<string, string | undef
 
 function FileCard({ file }: { file: ProcessedFile }) {
   const [showMetadata, setShowMetadata] = useState(false);
-  
-  const handleDownload = () => {
-    const cleanName = file.originalName.replace(/\.(pdf|docx)$/i, '_clean.$1');
-    saveAs(file.cleanedBlob, cleanName);
-  };
 
   const metadataCount = Object.values(file.removedMetadata).filter(
     (v) => v && v.trim() !== ''
   ).length;
 
   return (
-    <div className="file-card">
+    <div className={`file-card ${file.error ? 'file-card--error' : ''}`}>
       <div className="file-card__main">
         <div className={`file-card__icon file-card__icon--${file.type}`}>
           {file.type === 'pdf' ? <FileType size={24} /> : <FileText size={24} />}
@@ -61,10 +63,17 @@ function FileCard({ file }: { file: ProcessedFile }) {
         <div className="file-card__info">
           <h4>{file.originalName}</h4>
           <div className="file-card__status">
-            <span className="file-card__check">
-              <Check size={12} />
-              Cleaned
-            </span>
+            {file.error ? (
+              <span className="file-card__error">
+                <AlertCircle size={12} />
+                {file.error}
+              </span>
+            ) : (
+              <span className="file-card__check">
+                <Check size={12} />
+                Cleaned
+              </span>
+            )}
             {metadataCount > 0 && (
               <button
                 onClick={() => setShowMetadata(!showMetadata)}
@@ -77,10 +86,12 @@ function FileCard({ file }: { file: ProcessedFile }) {
           </div>
         </div>
 
-        <button onClick={handleDownload} className="btn btn--primary">
-          <Download size={16} />
-          Download
-        </button>
+        {!file.error && (
+          <button onClick={() => downloadFile(file)} className="btn btn--primary">
+            <Download size={16} />
+            Download
+          </button>
+        )}
       </div>
 
       {showMetadata && (
@@ -95,19 +106,14 @@ function FileCard({ file }: { file: ProcessedFile }) {
 export function FileList({ files }: FileListProps) {
   if (files.length === 0) return null;
 
-  const handleDownloadAll = () => {
-    files.forEach((file) => {
-      const cleanName = file.originalName.replace(/\.(pdf|docx)$/i, '_clean.$1');
-      saveAs(file.cleanedBlob, cleanName);
-    });
-  };
+  const cleanedFiles = files.filter((f) => f.cleanedBlob);
 
   return (
     <div className="file-list">
       <div className="file-list__header">
         <h2>Processed ({files.length})</h2>
-        {files.length > 1 && (
-          <button onClick={handleDownloadAll} className="btn btn--secondary">
+        {cleanedFiles.length > 1 && (
+          <button onClick={() => cleanedFiles.forEach(downloadFile)} className="btn btn--secondary">
             <Download size={14} />
             Download All
           </button>
