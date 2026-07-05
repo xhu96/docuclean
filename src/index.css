@@ -1,35 +1,42 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
-
 /* ==========================================================================
-   CSS Variables
+   Design tokens
+   A privacy tool makes zero third-party requests — system fonts only.
+   Accent = the "cleaned" green: the one color that means something here.
    ========================================================================== */
 :root {
-  --color-bg: #0a0a0f;
-  --color-surface: #12121a;
-  --color-surface-hover: #1a1a24;
-  --color-border: #25252f;
-  --color-border-hover: #35354a;
-  
-  --color-text: #ffffff;
-  --color-text-muted: #8888a0;
-  --color-text-dim: #55556a;
-  
-  --color-primary: #6366f1;
-  --color-primary-hover: #818cf8;
-  --color-success: #10b981;
-  --color-pdf: #ef4444;
-  --color-docx: #3b82f6;
-  
+  --color-bg: oklch(0.145 0.012 265);
+  --color-surface: oklch(0.185 0.014 265);
+  --color-surface-2: oklch(0.225 0.016 265);
+  --color-border: oklch(0.29 0.018 265);
+  --color-border-hover: oklch(0.38 0.02 265);
+
+  --color-text: oklch(0.96 0.005 250);
+  --color-text-muted: oklch(0.75 0.015 255);
+  --color-text-dim: oklch(0.62 0.018 255);
+
+  --color-accent: oklch(0.8 0.15 163);
+  --color-accent-hover: oklch(0.86 0.16 163);
+  --color-accent-ink: oklch(0.2 0.04 163);
+  --color-accent-dim: oklch(0.8 0.15 163 / 0.12);
+
+  --color-danger: oklch(0.72 0.17 25);
+  --color-danger-dim: oklch(0.72 0.17 25 / 0.12);
+  --color-pdf: oklch(0.72 0.17 25);
+  --color-docx: oklch(0.74 0.11 250);
+
   --radius-sm: 8px;
   --radius-md: 12px;
   --radius-lg: 16px;
   --radius-xl: 24px;
-  
-  --font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+
+  --font-family: ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto,
+    'Helvetica Neue', Arial, sans-serif;
+
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 /* ==========================================================================
-   Base Styles
+   Base
    ========================================================================== */
 *, *::before, *::after {
   box-sizing: border-box;
@@ -51,6 +58,21 @@ body {
   min-height: 100vh;
 }
 
+h1, h2, h3, h4 {
+  text-wrap: balance;
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+::selection {
+  background: var(--color-accent);
+  color: var(--color-accent-ink);
+}
+
 /* ==========================================================================
    Layout
    ========================================================================== */
@@ -59,7 +81,7 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 2rem;
+  padding: 2rem 1.25rem;
 }
 
 .container {
@@ -72,7 +94,7 @@ body {
    ========================================================================== */
 .header {
   text-align: center;
-  margin-bottom: 2rem;
+  margin-bottom: 2.25rem;
 }
 
 .header__logo {
@@ -81,32 +103,32 @@ body {
   justify-content: center;
   width: 56px;
   height: 56px;
-  background: linear-gradient(135deg, var(--color-primary), #8b5cf6);
+  background: var(--color-accent-dim);
+  border: 1px solid oklch(0.8 0.15 163 / 0.35);
   border-radius: var(--radius-lg);
-  color: white;
-  margin-bottom: 1rem;
-  box-shadow: 0 8px 32px rgba(99, 102, 241, 0.3);
+  color: var(--color-accent);
+  margin-bottom: 1.125rem;
 }
 
 .header h1 {
-  font-size: 2rem;
+  font-size: 1.875rem;
   font-weight: 700;
   letter-spacing: -0.02em;
-  margin-bottom: 0.25rem;
+  margin-bottom: 0.375rem;
 }
 
 .header__subtitle {
   color: var(--color-text-muted);
   font-size: 1rem;
-  margin-bottom: 0.75rem;
+  margin-bottom: 0.875rem;
 }
 
 .header__badge {
   display: inline-block;
   font-size: 0.75rem;
-  color: var(--color-success);
-  background: rgba(16, 185, 129, 0.1);
-  padding: 0.375rem 0.75rem;
+  color: var(--color-accent);
+  background: var(--color-accent-dim);
+  padding: 0.375rem 0.875rem;
   border-radius: 9999px;
   font-weight: 500;
 }
@@ -120,18 +142,18 @@ body {
   border-radius: var(--radius-xl);
   padding: 3rem 2rem;
   cursor: pointer;
-  transition: all 0.15s ease;
+  transition: border-color 0.2s var(--ease-out), background-color 0.2s var(--ease-out);
   margin-bottom: 1.5rem;
 }
 
 .dropzone:hover {
   border-color: var(--color-border-hover);
-  background: var(--color-surface-hover);
+  background: var(--color-surface-2);
 }
 
 .dropzone--active {
-  border-color: var(--color-primary);
-  background: rgba(99, 102, 241, 0.05);
+  border-color: var(--color-accent);
+  background: var(--color-accent-dim);
 }
 
 .dropzone--processing {
@@ -162,23 +184,22 @@ body {
 }
 
 .dropzone__icon--pdf {
-  background: rgba(239, 68, 68, 0.1);
+  background: var(--color-danger-dim);
   color: var(--color-pdf);
 }
 
 .dropzone__icon--docx {
-  background: rgba(59, 130, 246, 0.1);
+  background: oklch(0.74 0.11 250 / 0.12);
   color: var(--color-docx);
 }
 
-.dropzone__icon--dragging {
-  background: rgba(99, 102, 241, 0.15);
-  color: var(--color-primary);
+.dropzone__icon--dragging,
+.dropzone__icon--processing {
+  background: var(--color-accent-dim);
+  color: var(--color-accent);
 }
 
 .dropzone__icon--processing {
-  background: rgba(99, 102, 241, 0.15);
-  color: var(--color-primary);
   animation: spin 1s linear infinite;
 }
 
@@ -211,25 +232,25 @@ body {
   gap: 0.5rem;
   padding: 0.625rem 1rem;
   font-size: 0.875rem;
-  font-weight: 500;
+  font-weight: 600;
   font-family: inherit;
   border: none;
   border-radius: var(--radius-md);
   cursor: pointer;
-  transition: all 0.15s ease;
+  transition: background-color 0.15s var(--ease-out), color 0.15s var(--ease-out);
 }
 
 .btn--primary {
-  background: var(--color-primary);
-  color: white;
+  background: var(--color-accent);
+  color: var(--color-accent-ink);
 }
 
 .btn--primary:hover {
-  background: var(--color-primary-hover);
+  background: var(--color-accent-hover);
 }
 
 .btn--secondary {
-  background: var(--color-surface-hover);
+  background: var(--color-surface-2);
   color: var(--color-text-muted);
   border: 1px solid var(--color-border);
 }
@@ -240,7 +261,7 @@ body {
 }
 
 /* ==========================================================================
-   File List
+   File list
    ========================================================================== */
 .file-list {
   margin-top: 1.5rem;
@@ -266,18 +287,31 @@ body {
 }
 
 /* ==========================================================================
-   File Card
+   File card
    ========================================================================== */
 .file-card {
   background: var(--color-surface);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-lg);
   overflow: hidden;
-  transition: border-color 0.15s ease;
+  transition: border-color 0.15s var(--ease-out);
+  animation: card-in 0.25s var(--ease-out);
+}
+
+@keyframes card-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
 }
 
 .file-card:hover {
   border-color: var(--color-border-hover);
+}
+
+.file-card--error {
+  border-color: oklch(0.72 0.17 25 / 0.4);
+  background: oklch(0.72 0.17 25 / 0.04);
 }
 
 .file-card__main {
@@ -298,12 +332,12 @@ body {
 }
 
 .file-card__icon--pdf {
-  background: rgba(239, 68, 68, 0.1);
+  background: var(--color-danger-dim);
   color: var(--color-pdf);
 }
 
 .file-card__icon--docx {
-  background: rgba(59, 130, 246, 0.1);
+  background: oklch(0.74 0.11 250 / 0.12);
   color: var(--color-docx);
 }
 
@@ -332,7 +366,14 @@ body {
   display: flex;
   align-items: center;
   gap: 0.25rem;
-  color: var(--color-success);
+  color: var(--color-accent);
+}
+
+.file-card__error {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  color: var(--color-danger);
 }
 
 .file-card__toggle {
@@ -349,7 +390,7 @@ body {
 }
 
 .file-card__toggle:hover {
-  color: var(--color-text-muted);
+  color: var(--color-text);
 }
 
 .file-card__metadata {
@@ -357,7 +398,7 @@ body {
 }
 
 /* ==========================================================================
-   Metadata
+   Metadata preview
    ========================================================================== */
 .metadata-grid {
   display: grid;
@@ -383,10 +424,12 @@ body {
 }
 
 .metadata-value {
-  color: var(--color-pdf);
+  color: var(--color-text-muted);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  text-decoration: line-through;
+  text-decoration-color: var(--color-danger);
 }
 
 .metadata-more {
@@ -419,8 +462,9 @@ body {
   gap: 0.375rem;
 }
 
-.footer__status svg {
-  color: var(--color-success);
+/* offline is the proud state for a tool that never phones home */
+.footer__status--offline {
+  color: var(--color-accent);
 }
 
 .footer__link {
@@ -429,35 +473,15 @@ body {
   gap: 0.375rem;
   color: inherit;
   text-decoration: none;
-  transition: color 0.15s ease;
+  transition: color 0.15s var(--ease-out);
 }
 
 .footer__link:hover {
-  color: var(--color-text-muted);
+  color: var(--color-text);
 }
 
 /* ==========================================================================
-   Scrollbar
-   ========================================================================== */
-::-webkit-scrollbar {
-  width: 6px;
-}
-
-::-webkit-scrollbar-track {
-  background: var(--color-bg);
-}
-
-::-webkit-scrollbar-thumb {
-  background: var(--color-border);
-  border-radius: 3px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: var(--color-border-hover);
-}
-
-/* ==========================================================================
-   Field Selector
+   Field selector
    ========================================================================== */
 .field-selector {
   margin-bottom: 1rem;
@@ -476,11 +500,11 @@ body {
   font-family: inherit;
   font-size: 0.875rem;
   cursor: pointer;
-  transition: all 0.15s ease;
+  transition: background-color 0.15s var(--ease-out), border-color 0.15s var(--ease-out);
 }
 
 .field-selector__toggle:hover {
-  background: var(--color-surface-hover);
+  background: var(--color-surface-2);
   border-color: var(--color-border-hover);
 }
 
@@ -501,7 +525,6 @@ body {
   border-radius: var(--radius-md);
 }
 
-/* Field Group */
 .field-group {
   margin-bottom: 1rem;
 }
@@ -544,18 +567,18 @@ body {
   border-radius: var(--radius-sm);
   color: var(--color-text-dim);
   cursor: pointer;
-  transition: all 0.15s ease;
+  transition: background-color 0.15s var(--ease-out), color 0.15s var(--ease-out);
 }
 
 .field-group__btn:hover {
   background: var(--color-border);
-  color: var(--color-text-muted);
+  color: var(--color-text);
 }
 
 .field-group__btn--active {
-  background: var(--color-primary);
-  border-color: var(--color-primary);
-  color: white;
+  background: var(--color-accent);
+  border-color: var(--color-accent);
+  color: var(--color-accent-ink);
 }
 
 .field-group__grid {
@@ -564,7 +587,7 @@ body {
   gap: 0.375rem;
 }
 
-/* Checkbox */
+/* Checkbox — input stays focusable for keyboard users */
 .field-checkbox {
   display: flex;
   align-items: center;
@@ -572,7 +595,7 @@ body {
   padding: 0.375rem 0.5rem;
   border-radius: var(--radius-sm);
   cursor: pointer;
-  transition: background 0.1s ease;
+  transition: background-color 0.1s var(--ease-out);
 }
 
 .field-checkbox:hover {
@@ -580,7 +603,12 @@ body {
 }
 
 .field-checkbox input {
-  display: none;
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
 }
 
 .field-checkbox__box {
@@ -593,16 +621,72 @@ body {
   border: 1px solid var(--color-border);
   border-radius: 4px;
   color: transparent;
-  transition: all 0.1s ease;
+  transition: background-color 0.1s var(--ease-out), border-color 0.1s var(--ease-out);
+  flex-shrink: 0;
 }
 
 .field-checkbox input:checked + .field-checkbox__box {
-  background: var(--color-primary);
-  border-color: var(--color-primary);
-  color: white;
+  background: var(--color-accent);
+  border-color: var(--color-accent);
+  color: var(--color-accent-ink);
+}
+
+.field-checkbox input:focus-visible + .field-checkbox__box {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
 }
 
 .field-checkbox__label {
   font-size: 0.75rem;
   color: var(--color-text-muted);
+}
+
+/* ==========================================================================
+   Scrollbar
+   ========================================================================== */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--color-bg);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-border);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-border-hover);
+}
+
+/* ==========================================================================
+   Small screens
+   ========================================================================== */
+@media (max-width: 420px) {
+  .field-group__grid,
+  .metadata-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .dropzone {
+    padding: 2.25rem 1.25rem;
+  }
+}
+
+/* ==========================================================================
+   Reduced motion
+   ========================================================================== */
+@media (prefers-reduced-motion: reduce) {
+  .file-card {
+    animation: none;
+  }
+
+  .dropzone,
+  .btn,
+  .field-selector__toggle,
+  .field-checkbox__box {
+    transition: none;
+  }
 }
