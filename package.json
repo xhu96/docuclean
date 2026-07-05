@@ -1,29 +1,27 @@
 {
-  "name": "metadata-cleaner",
+  "name": "docuclean",
   "private": true,
-  "version": "0.0.0",
+  "version": "1.0.0",
   "license": "MIT",
   "type": "module",
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "smoke": "npx -y tsx scripts/smoke.ts"
   },
   "dependencies": {
-    "@types/file-saver": "^2.0.7",
-    "clsx": "^2.1.1",
     "file-saver": "^2.0.5",
-    "framer-motion": "^12.23.26",
     "jszip": "^3.10.1",
     "lucide-react": "^0.562.0",
     "pdf-lib": "^1.17.1",
     "react": "^19.2.0",
-    "react-dom": "^19.2.0",
-    "tailwind-merge": "^3.4.0"
+    "react-dom": "^19.2.0"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.1",
+    "@types/file-saver": "^2.0.7",
     "@types/node": "^24.10.1",
     "@types/react": "^19.2.5",
     "@types/react-dom": "^19.2.3",
@@ -35,5 +33,11 @@
     "typescript": "~5.9.3",
     "typescript-eslint": "^8.46.4",
     "vite": "^7.2.4"
-  }
+  },
+  "description": "Strip metadata from PDF and DOCX files entirely in your browser - no uploads, no server.",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/xhu96/docuclean.git"
+  },
+  "homepage": "https://xhu96.github.io/docuclean/"
 }
