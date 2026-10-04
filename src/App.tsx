@@ -1,107 +1,60 @@
-import { useState, useCallback, useEffect } from 'react';
-import { Shield, Github, Wifi, WifiOff } from 'lucide-react';
-import { DropZone, FileList, FieldSelector, type ProcessedFile, type FieldConfig } from './components';
-import { cleanPdf, cleanDocx, DEFAULT_PDF_FIELDS, DEFAULT_DOCX_FIELDS } from './utils/cleaners';
+import { useState } from 'react';
+import * as Tooltip from '@radix-ui/react-tooltip';
+import { ChevronRight, X } from 'lucide-react';
+import { useDocumentSession } from './hooks/useDocumentSession';
+import { downloadDocument, downloadReport, downloadZip } from './lib/exports';
+import { DocumentQueue } from './components/workbench/DocumentQueue';
+import { Inspector } from './components/workbench/Inspector';
+import { EmptyInspector } from './components/workbench/EmptyInspector';
 
 function App() {
-  const [files, setFiles] = useState<ProcessedFile[]>([]);
-  const [isProcessing, setIsProcessing] = useState(false);
-  const [isOnline, setIsOnline] = useState(navigator.onLine);
-  const [fieldConfig, setFieldConfig] = useState<FieldConfig>({
-    pdf: { ...DEFAULT_PDF_FIELDS },
-    docx: { ...DEFAULT_DOCX_FIELDS },
-  });
+  const session = useDocumentSession();
+  const [sampleLoading, setSampleLoading] = useState(false);
+  const [zipLoading, setZipLoading] = useState(false);
+  const [feedback, setFeedback] = useState('');
+  const active = session.documents.find((document) => document.id === session.activeId);
+  const busy = session.busy || sampleLoading;
 
-  useEffect(() => {
-    const handleOnline = () => setIsOnline(true);
-    const handleOffline = () => setIsOnline(false);
-    window.addEventListener('online', handleOnline);
-    window.addEventListener('offline', handleOffline);
-    return () => {
-      window.removeEventListener('online', handleOnline);
-      window.removeEventListener('offline', handleOffline);
-    };
-  }, []);
+  async function loadSamples() {
+    setSampleLoading(true);
+    try {
+      const { createSampleDocuments } = await import('./lib/sample');
+      await session.addFiles(await createSampleDocuments());
+    } catch (error) {
+      setFeedback(error instanceof Error ? error.message : 'Sample files could not be created. Please try your own document.');
+    } finally { setSampleLoading(false); }
+  }
 
-  const handleFilesSelected = useCallback(async (selectedFiles: File[]) => {
-    setIsProcessing(true);
+  async function saveArchive() {
+    setZipLoading(true);
+    try { await downloadZip(session.documents); }
+    catch (error) { setFeedback(error instanceof Error ? error.message : 'The archive could not be created. Try downloading files individually.'); }
+    finally { setZipLoading(false); }
+  }
 
-    const processedFiles: ProcessedFile[] = [];
-
-    for (const file of selectedFiles) {
-      const isPdf = file.type === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf');
-      const isDocx =
-        file.type === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' ||
-        file.name.toLowerCase().endsWith('.docx');
-      if (!isPdf && !isDocx) continue;
-
-      const type = isPdf ? 'pdf' : 'docx';
-      const base = { id: crypto.randomUUID(), originalName: file.name, type, processedAt: new Date() } as const;
-
-      try {
-        const result = isPdf
-          ? await cleanPdf(file, fieldConfig.pdf)
-          : await cleanDocx(file, fieldConfig.docx);
-        processedFiles.push({ ...base, cleanedBlob: result.cleanedBlob, removedMetadata: result.removedMetadata });
-      } catch (error) {
-        const message = error instanceof Error && /encrypt/i.test(error.message)
-          ? 'This PDF is password-protected — remove the protection first.'
-          : 'Could not process this file. It may be corrupt or in an unsupported format.';
-        processedFiles.push({ ...base, removedMetadata: {}, error: message });
-      }
-    }
-
-    setFiles((prev) => [...processedFiles, ...prev]);
-    setIsProcessing(false);
-  }, [fieldConfig]);
-
+  const notices = [...session.notices, ...(feedback ? [feedback] : [])];
   return (
-    <div className="app">
-      <div className="container">
-        {/* Header */}
-        <header className="header">
-          <div className="header__logo">
-            <Shield size={28} />
-          </div>
-          <h1>DocuClean</h1>
-          <p className="header__subtitle">
-            Remove metadata from PDF & DOCX files
-          </p>
-          <p className="header__badge">
-            100% client-side • No uploads • No tracking
-          </p>
-        </header>
-
-        {/* Main */}
-        <main>
-          <FieldSelector config={fieldConfig} onChange={setFieldConfig} />
-          <DropZone onFilesSelected={handleFilesSelected} isProcessing={isProcessing} />
-          <FileList files={files} />
+    <Tooltip.Provider delayDuration={450}>
+      <a className="skip-link" href="#workspace">Skip to document inspector</a>
+      <div className="app-shell">
+        <DocumentQueue documents={session.documents} activeId={session.activeId} busy={busy} zipLoading={zipLoading} progress={session.progress}
+          onSelect={session.setActiveId} onAdd={(files) => { void session.addFiles(files); }} onReject={setFeedback}
+          onRemove={session.removeDocument} onClear={session.clearSession} onCancel={session.cancel}
+          onCleanAll={() => { void session.cleanAll(); }} onDownloadZip={() => { void saveArchive(); }} />
+        <main className="main-shell" id="workspace" tabIndex={-1}>
+          <header className="workspace-bar">
+            <div className="breadcrumb"><span>Documents</span><ChevronRight size={13} /><strong>{active ? 'Inspector' : 'New session'}</strong></div>
+            <span className="session-indicator"><span />Local session</span>
+          </header>
+          {notices.length > 0 && <div className="notice-banner" role="alert"><div>{notices.map((notice, index) => <p key={index}>{notice}</p>)}</div><button className="icon-button" aria-label="Dismiss notifications" onClick={() => { session.dismissNotices(); setFeedback(''); }}><X size={17} /></button></div>}
+          {active ? <Inspector key={active.id} document={active} busy={busy}
+            onPreset={session.setPreset} onToggle={session.toggleField} onSelectAll={session.selectAll}
+            onClean={(id) => { void session.cleanOne(id); }} onRetry={(id) => { void session.retry(id); }}
+            onDownload={downloadDocument} onReport={downloadReport} /> :
+            <EmptyInspector busy={busy} sampleLoading={sampleLoading} onAdd={(files) => { void session.addFiles(files); }} onReject={setFeedback} onSample={() => { void loadSamples(); }} />}
         </main>
-
-        {/* Footer */}
-        <footer className="footer">
-          <div className={`footer__status ${isOnline ? '' : 'footer__status--offline'}`}>
-            {isOnline ? (
-              <>
-                <Wifi size={14} />
-                <span>Online — files never leave your device</span>
-              </>
-            ) : (
-              <>
-                <WifiOff size={14} />
-                <span>Offline — fully functional</span>
-              </>
-            )}
-          </div>
-          <a href="https://github.com/xhu96/docuclean" target="_blank" rel="noopener noreferrer" className="footer__link">
-            <Github size={14} />
-            Source
-          </a>
-        </footer>
       </div>
-    </div>
+    </Tooltip.Provider>
   );
 }
-
 export default App;

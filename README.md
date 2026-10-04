@@ -1,59 +1,69 @@
-# DocuClean 🛡️
+# DocuClean
 
-Strip metadata from PDF and DOCX files — entirely in your browser. Files never leave your device.
+Inspect and remove supported PDF and DOCX metadata in your browser. Files are processed on your device; originals are never overwritten.
 
-[![Deploy to GitHub Pages](https://github.com/xhu96/docuclean/actions/workflows/deploy.yml/badge.svg)](https://github.com/xhu96/docuclean/actions/workflows/deploy.yml)
+## Use
 
-**[Open DocuClean →](https://xhu96.github.io/docuclean/)**
+1. Add documents or choose **Use example documents**.
+2. Inspect detected properties and content warnings.
+3. Select **All metadata**, **Identity only**, or individual properties.
+4. Create a cleaned copy. DocuClean reparses it and checks that the selected properties are absent and unselected properties are intact.
+5. Download a verified copy, a ZIP of successful results, or a complete JSON metadata report.
 
-## Why
+Reports include original metadata values and should be treated as sensitive. They are not added automatically to ZIP downloads.
 
-Documents carry more than their content: author names, company names, revision counts, editing time, creation dates — even a rendered preview of page one. DocuClean removes all of it before you share the file.
+## What's included
 
-## Features
+- Document workspace with a file queue, searchable metadata table, full values, and a dedicated cleaning panel.
+- Separate review and cleaned-file views, with actual removed/remaining counts and an explicit return to selection.
+- Locally bundled Geist typography, consistent controls, accessible result tabs, and a compact mobile document switcher.
+- Independent configuration for each document.
+- Local PDF information dictionary and catalog XMP inspection, including custom Info properties.
+- Namespace-aware DOCX core/extended properties, individually selectable custom properties, and embedded document previews.
+- Warnings for common comments, revisions, hidden text, attachments, media and signature indicators.
+- Actual output verification; failed checks never produce a successful download state.
+- Sequential batch processing in a Web Worker, incremental progress, cancellation, retry, per-file removal and session clearing.
+- Collision-safe ZIP names, full JSON reports, and synthetic sample documents using the real pipeline.
+- Keyboard-accessible input and dialogs, responsive layouts, and reduced-motion support.
+- 50 MiB per file, 200 MiB per session, 50 files. Additional expanded ZIP/XML inspection limits protect the parser.
 
-- **100% client-side** — no uploads, no server, no analytics. You can go offline before selecting files.
-- **Selective removal** — choose exactly which fields to strip
-- **Batch processing** — clean multiple files at once
-- **Transparent** — shows you every value it removed, per file
+## Scope and limits
 
-## What gets removed
+This is a metadata tool, not a complete anonymizer or content-redaction tool. Visible text, comments, tracked revisions, images, embedded files, PDF forms, document IDs and some other hidden structures remain. Detection is best effort and is not exhaustive. Review content warnings before sharing.
 
-**PDF**
+The Identity only preset selects fields explicitly classed as names or organizations; it does not classify arbitrary text, titles, dates, custom values or XMP contents. Review the full table.
 
-- Info dictionary: Title, Author, Subject, Keywords, Creator, Producer, Creation/Modification dates — keys are deleted outright, not blanked
-- XMP metadata stream (where Word, InDesign, etc. duplicate author and tool info)
+Encrypted PDFs and detected digitally signed documents cannot be cleaned. DOCX ZIP64/split archives, oversized expanded packages, malformed XML, and XML entity declarations are rejected. UTF-8 OOXML is supported. Some unusual documents may require another editor.
 
-**DOCX**
+Verification checks supported metadata locations with a fresh parse. It does not certify forensic sanitization or prove every content object is unchanged. DOCX body parts are retained; PDF serialization may rewrite the structure.
 
-- Core properties: title, subject, creator, keywords, description, last modified by, revision, dates, category, content status
-- Extended properties: company, manager, application, app version, template, total editing time, security flags
-- Custom properties (`docProps/custom.xml`), with package relationships cleaned up so Word never flags the file
-- Document thumbnail (an embedded image of page one that survives property cleaning)
-
-## What it does *not* remove
-
-- **DOCX content-level traces**: tracked changes, comments, hidden text, embedded media metadata
-- **PDF content**: embedded attachments, digital signatures, text in the pages themselves
-- **Password-protected PDFs** are rejected with a clear error instead of producing corrupt output
+The app has no upload endpoint, tracking, document persistence, external fonts, or account. Documents and results remain in memory until cleared or the tab closes. Loading the page, worker and assets needs a connection; offline reopening is not provided by a service worker.
 
 ## Development
 
-```bash
-npm install
-npm run dev     # start dev server
-npm run build   # production build
-npm run lint    # eslint
-npm run smoke   # end-to-end check that cleaning actually cleans
+Requires Node.js 20.19+ or 22.12+ (verified with Node 26).
+
+```sh
+npm ci
+npm run dev
+npm run test
+npm run smoke
+npm run lint
+npm run build
 ```
 
-## Tech stack
+Vite uses the existing `/docuclean/` base path for GitHub Pages.
 
-- React + TypeScript + Vite
-- [pdf-lib](https://pdf-lib.js.org/) — PDF manipulation
-- [JSZip](https://stuk.github.io/jszip/) — DOCX (OOXML) handling
-- Lucide React — icons
+## Implementation
 
-## License
+React + TypeScript + Vite; React Dropzone for file input; Radix Dialog, Tooltip and Tabs for accessible interactions; Geist Variable for locally hosted typography; Lucide for icons; pdf-lib, JSZip and xmldom for document processing. All libraries are bundled locally.
 
-Released under the [MIT License](LICENSE).
+- `src/lib/documents/` — inspection, removal and verification.
+- `src/lib/session.ts` — memory-only queue and selection policy.
+- `src/workers/` — cancellable document processing.
+- `src/lib/exports.ts` — verified downloads and reports.
+- `src/components/workbench/` — product interface.
+- `scripts/engine.test.ts`, `scripts/session.test.ts` — functional fixtures and queue/export regression tests.
+- `docs/qa.md` — browser checks, design comparison and known boundaries.
+
+MIT License. Based on [xhu96/docuclean](https://github.com/xhu96/docuclean).
